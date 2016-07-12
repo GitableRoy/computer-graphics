@@ -1,13 +1,17 @@
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
+#ifdef __WIN32
+  #include <windows.h>  // For MS Windows
 #endif
 
 #ifdef __APPLE__
-#include <GLUT/glut.h>
+  #include <OpenGL/gl.h>
 #else
-#include <GL/glut.h>
+  #include <GL/gl.h>
+#endif
+
+#ifdef __APPLE__
+  #include <GLUT/glut.h>
+#else
+  #include <GL/glut.h>
 #endif
 
 void display(void) {
