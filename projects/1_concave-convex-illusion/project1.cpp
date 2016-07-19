@@ -70,7 +70,7 @@ void createCircle(int x_center, int y_center, int radius) {
 
         // start line, end line
         glVertex2f( x_line_start, y_line_start);
-        glVertex2f( x_line_end, y_line_end);
+        glVertex2f( x_line_end, y_line_start);  // y_line_end not neccesary because the circle is horizontal
 
     }
 
