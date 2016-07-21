@@ -30,6 +30,49 @@
 
 #define RADIUS 200
 
+void drawCircle (void) {
+    /**
+
+     */
+
+    GLfloat x_center = 0;
+    GLfloat y_center = 0;
+    GLfloat y_position;
+    GLfloat x_position;
+
+    float gradient_color = 0;
+
+
+    std::cout << "Drawing Circle" << std::endl;
+
+    glBegin(GL_LINES);
+
+    for ( y_position = RADIUS; y_position >= (-1 * RADIUS); y_position -= 0.05 ) {
+
+        // Find X
+        if (( (RADIUS * RADIUS) - ( y_position * y_position ) ) < 0) continue;
+        else x_position = sqrt( (RADIUS * RADIUS) - (( y_position * y_position ) + (y_center * y_center)) );
+
+//        if (( ((y_position - y_center) * (y_position - y_center)) - (RADIUS * RADIUS)) < 0) continue;
+//        else x_position = sqrt( pow((y_position - y_center), 2) - pow(RADIUS, 2) ) + x_center;
+
+        // Change Color
+        gradient_color = y_position / (RADIUS);
+        glColor3f( gradient_color, gradient_color, gradient_color);
+        std::cout << "Gradient Color is: " << gradient_color << std::endl;
+
+        // Draw Line
+        glVertex2f( (-1 * x_position), y_position );
+        glVertex2f(x_position, y_position);
+        std::cout << "X: "<< x_position << ", Y: " << y_position << std::endl;
+    }
+
+    glEnd();
+
+    std::cout << "Circle Drawn" << std::endl;
+}
+
+
 void createCircle(int x_center, int y_center, int radius) {
     /**
      Starts at top of circle
