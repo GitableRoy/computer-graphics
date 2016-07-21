@@ -20,9 +20,9 @@
 #include <OpenGL/glu.h>
 #include <GLUT/glut.h>
 #else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
+#include <gl/gl.h>
+#include <gl/glu.h>
+#include <gl/glut.h>
 #endif
 
 #define WIDTH  800
@@ -32,7 +32,7 @@
 
 void drawCircle (void) {
     /**
-
+        Does stuff
      */
 
     GLfloat x_center = 0;
@@ -57,7 +57,7 @@ void drawCircle (void) {
 //        else x_position = sqrt( pow((y_position - y_center), 2) - pow(RADIUS, 2) ) + x_center;
 
         // Change Color
-        gradient_color = y_position / (RADIUS);
+        gradient_color = ((y_position + RADIUS )/ (2 * RADIUS));
         glColor3f( gradient_color, gradient_color, gradient_color);
         std::cout << "Gradient Color is: " << gradient_color << std::endl;
 
