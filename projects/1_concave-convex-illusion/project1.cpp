@@ -7,7 +7,8 @@
 //
 
 #include <stdio.h>
-
+#include <stdlib.h>
+#include <time.h>
 #include <iostream>
 #include <math.h>
 
@@ -28,7 +29,8 @@
 #define WIDTH  800
 #define HEIGHT 600
 
-#define RADIUS 40
+#define RADIUS 100
+#define PADDING 10
 
 
 void drawCircle (GLfloat x_center, GLfloat y_center, bool concave) {
@@ -46,7 +48,7 @@ void drawCircle (GLfloat x_center, GLfloat y_center, bool concave) {
 
     glBegin(GL_LINES);
 
-    for ( y_position = RADIUS; y_position >= (-1 * RADIUS); y_position -= 0.05 ) {
+    for ( y_position = RADIUS; y_position >= (-1 * RADIUS); y_position-- ) {
 
         // Find X
         if (( (RADIUS * RADIUS) - ( y_position * y_position ) ) < 0) continue;
@@ -119,16 +121,63 @@ void createCircle(int x_center, int y_center, int radius) {
     std::cout << "Circle Created" << std::endl;
 }
 
+//bool isOverlapping (Circle) {
+//
+//}
+
+void callCircle(int amount) {
+    GLfloat prev_x_center[amount];// = {};
+    GLfloat prev_y_center[amount];// = {};
+    GLfloat curr_x_center;
+    GLfloat curr_y_center;
+
+
+    while (amount > 0) {
+        // Select random place on map for center
+        curr_x_center = rand() % (WIDTH - RADIUS - PADDING) + (-(WIDTH - RADIUS));
+        curr_y_center = rand() % (HEIGHT - RADIUS - PADDING) + (-(HEIGHT - RADIUS));
+        bool concave = rand() % 2;
+        int successful_draws = 0;
+
+        for( int i = 0; i < amount; i++) {
+
+            if (( fabs(curr_x_center - prev_x_center[i]) <= (RADIUS/2) )  ||
+                ( fabs(prev_y_center[i] + curr_y_center) <= (RADIUS/2) )) {
+                std::cout << "unsuccessful" << std::endl;
+                break;
+            }
+            if ((( fabs(curr_x_center - prev_x_center[i]) <= (RADIUS/2) )  ||
+                 ( fabs(prev_y_center[i] + curr_y_center) <= (RADIUS/2) )) &&
+                 (i == successful_draws) ) {
+                std::cout << "unsuccessful" << std::endl;
+                continue;
+            }
+            else {
+                std::cout << "successful! distance between center x and last center x is: " << fabs(prev_x_center[i] + curr_x_center) << std::endl;
+
+                std::cout << "successful! distance between center y and last center y is: " << fabs(prev_y_center[i] + curr_y_center) << std::endl;
+
+                drawCircle(curr_x_center, curr_y_center, concave);
+                prev_x_center[i+1] = curr_x_center;
+                prev_y_center[i+1] = curr_y_center;
+                amount--;
+            }
+        }
+    }
+}
+
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.0, 0.0, 0.0);
 
-    drawCircle(100, 90, true);
-    drawCircle(20, 50, false);
-    drawCircle(-100, 70, true);
-    drawCircle(-50, -70, false);
+    drawCircle(600, 90, true);
+    drawCircle(200, 127, false);
+    drawCircle(-100, 210, true);
+    drawCircle(-500, -70, false);
     drawCircle(-150, -100, true);
     drawCircle(70, -50, false);
+
+//    callCircle(8);
 
     glFlush();
 }
@@ -158,7 +207,7 @@ int main(int argc, char** argv) {
     glClearColor(0.5, 0.5, 0.5, 0.0);
 
 //    gluOrtho2D(0.0, WIDTH, 0.0, HEIGHT);
-    gluOrtho2D(-200.0, 200.0, -150.0, 150.0);
+    gluOrtho2D(-WIDTH, WIDTH, -HEIGHT, HEIGHT);
     glutDisplayFunc(display);
 //    glutReshapeFunc(reshape);
     glutMainLoop();
