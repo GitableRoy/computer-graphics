@@ -44,7 +44,7 @@ void drawCircle (GLfloat x_center, GLfloat y_center, bool concave) {
     float gradient_color = 0;
 
 
-    std::cout << "Drawing Circle" << std::endl;
+//    std::cout << "Drawing Circle" << std::endl;
 
     glBegin(GL_LINES);
 
@@ -69,147 +69,96 @@ void drawCircle (GLfloat x_center, GLfloat y_center, bool concave) {
 
     glEnd();
 
-    std::cout << "Circle Drawn" << std::endl;
+//    std::cout << "Circle Drawn" << std::endl;
 }
 
-void createCircle(int x_center, int y_center, int radius) {
-    /**
-     Starts at top of circle
-        Finds the x, y   location of the circle's circumference
-        Finds the x´, y´ location of the circle's circumference (horizonatally opposite of it)
-     Draws horizontal line from x,y to x´,y´ 
-     Repeats this by moving counterclockwise from 90˚ to 270˚
-
-     */
-
-    GLfloat x_line_start;
-    GLfloat y_line_start;
-    GLfloat x_line_end;
-    GLfloat y_line_end;
-    float color = 0;
-
-    std::cout << "Creating Circle" << std::endl;
-
-    glBegin(GL_LINES);
-
-    for (float angle = 90; angle <= 270; angle += 0.05	) {
-
-        std::cout << angle << std::endl;
-
-        /* color is equal to percentage of angle completion */
-        color = (angle - 90) / 180;
-        glColor3f( color, color, color);
-
-//        std::cout << "Color is: " << color << std::endl;
-
-        /* start of line at x,y points based on angle */
-        x_line_start = radius * cos(angle) + x_center;
-        y_line_start = radius * sin(angle) + y_center;
-
-        /* end of line at x´, y´ points based on angle  */
-        x_line_end = radius * cos(180 - angle) + x_center;
-        y_line_end = radius * sin(180 - angle) + y_center;  // unneccesary, the line is horizonal
-
-        /* start line, end line */
-        glVertex2f( x_line_start, y_line_start);
-        glVertex2f( x_line_end, y_line_start);              // using line
-
-    }
-
-    glEnd();
-
-    std::cout << "Circle Created" << std::endl;
+bool concave (int draws) {
+    return draws % 2 == 0;
 }
 
-//bool isOverlapping (Circle) {
-//
-//}
-
-void callCircle(int amount) {
+void generateCircles(int amount) {
     GLfloat prev_x_center[amount];// = {};
     GLfloat prev_y_center[amount];// = {};
     GLfloat curr_x_center;
     GLfloat curr_y_center;
+    int successful_draws = 0;
 
 
+    // set first circle
+    curr_x_center = rand() % ((WIDTH * 3/2) - (RADIUS *2));
+    curr_y_center = rand() % ((HEIGHT * 3/2) - (RADIUS *2));
+    curr_x_center -= WIDTH;
+    curr_y_center -= HEIGHT;
+    drawCircle(curr_x_center, curr_y_center, true);
+    prev_x_center[0] = curr_x_center;
+    prev_y_center[0] = curr_y_center;
+    successful_draws++;
+    amount--;
+
+
+    // draw the rest of circles
     while (amount > 0) {
+
         // Select random place on map for center
-        curr_x_center = rand() % (WIDTH - RADIUS - PADDING) + (-(WIDTH - RADIUS));
-        curr_y_center = rand() % (HEIGHT - RADIUS - PADDING) + (-(HEIGHT - RADIUS));
-        bool concave = rand() % 2;
-        int successful_draws = 0;
+        curr_x_center = rand() % (WIDTH * 3/2);
+        curr_y_center = rand() % (HEIGHT * 3/2);
+        curr_x_center -= WIDTH;
+        curr_y_center -= HEIGHT;
 
-        for( int i = 0; i < amount; i++) {
+//        std::cout <<"("<<curr_x_center<<", "<<curr_y_center<<")"<<std::endl;
 
-            if (( fabs(curr_x_center - prev_x_center[i]) <= (RADIUS/2) )  ||
-                ( fabs(prev_y_center[i] + curr_y_center) <= (RADIUS/2) )) {
-                std::cout << "unsuccessful" << std::endl;
-                break;
+        int i = 0;
+        bool placeable = true;
+        while( prev_x_center[i] != 0) {
+            if (( fabs(curr_x_center - prev_x_center[i]) <= (RADIUS * 2) )  ||
+                ( fabs(prev_y_center[i] + curr_y_center) <= (RADIUS * 2) )) {
+                placeable = false;
             }
-            if ((( fabs(curr_x_center - prev_x_center[i]) <= (RADIUS/2) )  ||
-                 ( fabs(prev_y_center[i] + curr_y_center) <= (RADIUS/2) )) &&
-                 (i == successful_draws) ) {
-                std::cout << "unsuccessful" << std::endl;
-                continue;
-            }
-            else {
-                std::cout << "successful! distance between center x and last center x is: " << fabs(prev_x_center[i] + curr_x_center) << std::endl;
+            i++;
+        }
 
-                std::cout << "successful! distance between center y and last center y is: " << fabs(prev_y_center[i] + curr_y_center) << std::endl;
-
-                drawCircle(curr_x_center, curr_y_center, concave);
-                prev_x_center[i+1] = curr_x_center;
-                prev_y_center[i+1] = curr_y_center;
-                amount--;
-            }
+        if (placeable) {
+            drawCircle(curr_x_center, curr_y_center, concave(successful_draws));
+            std::cout <<"("<<curr_x_center<<", "<<curr_y_center<<")"<<std::endl;
+            prev_x_center[i+1] = curr_x_center;
+            prev_y_center[i+1] = curr_y_center;
+            successful_draws++;
+            amount--;
         }
     }
+
+
 }
 
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.0, 0.0, 0.0);
 
-    drawCircle(600, 90, true);
-    drawCircle(200, 127, false);
-    drawCircle(-100, 210, true);
-    drawCircle(-500, -70, false);
-    drawCircle(-150, -100, true);
-    drawCircle(70, -50, false);
+//    drawCircle(600, 90, true);
+//    drawCircle(200, 127, false);
+//    drawCircle(-160, 210, true);
+//    drawCircle(-500, -70, false);
+//    drawCircle(-150, -100, true);
+//    drawCircle(70, -400, false);
 
-//    callCircle(8);
+    generateCircles(6);
 
     glFlush();
-}
-
-void reshape (GLsizei width, GLsizei height) {
-    float w_aspect = WIDTH / HEIGHT, aspect=((float)width) / height;
-    if (aspect <= w_aspect) {
-        glViewport( 0, (height - width / w_aspect)/2, width, width/w_aspect);
-    }
-    else {
-        glViewport(( width - height * w_aspect ) / 2, 0, height * w_aspect, height );
-    }
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity ();
-    gluOrtho2D(0.0, WIDTH, 0.0, HEIGHT);
 }
 
 int main(int argc, char** argv) {
     /* Initialize GLUT */
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-    glutInitWindowSize(800, 600);
+    glutInitWindowSize(WIDTH, HEIGHT);
     glutInitWindowPosition(200, 100);
     glutCreateWindow("Project 1");
 
 
     glClearColor(0.5, 0.5, 0.5, 0.0);
 
-//    gluOrtho2D(0.0, WIDTH, 0.0, HEIGHT);
     gluOrtho2D(-WIDTH, WIDTH, -HEIGHT, HEIGHT);
     glutDisplayFunc(display);
-//    glutReshapeFunc(reshape);
     glutMainLoop();
     return 0;
 }
