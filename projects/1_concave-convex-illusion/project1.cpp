@@ -28,31 +28,14 @@
 #define WIDTH  800
 #define HEIGHT 600
 
-#define RADIUS 100
+#define RADIUS 40
 
-GLfloat r(double angle) {
-    return sin(angle);
-}
 
-void createOval(void) {
-    glBegin(GL_LINES);
-
-    double t, p = 3.141593 / 180;
-    for(int i = 0; i < 360; i = i + 1) {
-        t = i * p;
-        glVertex2f(r(t) * cos(t), r(t) * sin(t));
-    }
-
-    glEnd();
-}
-
-void drawCircle (void) {
+void drawCircle (GLfloat x_center, GLfloat y_center, bool concave) {
     /**
         Does stuff
      */
 
-    GLfloat x_center = 0;
-    GLfloat y_center = 0;
     GLfloat y_position;
     GLfloat x_position;
 
@@ -67,19 +50,18 @@ void drawCircle (void) {
 
         // Find X
         if (( (RADIUS * RADIUS) - ( y_position * y_position ) ) < 0) continue;
-        else x_position = sqrt( (RADIUS * RADIUS) - (( y_position * y_position ) + (y_center * y_center)) );
-
-//        if (( ((y_position - y_center) * (y_position - y_center)) - (RADIUS * RADIUS)) < 0) continue;
-//        else x_position = sqrt( pow((y_position - y_center), 2) - pow(RADIUS, 2) ) + x_center;
+        else x_position = sqrt( (RADIUS * RADIUS) - (( y_position * y_position )) );
 
         // Change Color
-        gradient_color = fabs((y_position + RADIUS )/ (2 * RADIUS));
+        if (concave) gradient_color = fabs((y_position + RADIUS )/ (2 * RADIUS));
+        else gradient_color = fabs((y_position - RADIUS )/ (2 * RADIUS)); //else convex
+
         glColor3f( gradient_color, gradient_color, gradient_color);
-        std::cout << "Gradient Color is: " << gradient_color << std::endl;
+//        std::cout << "Gradient Color is: " << gradient_color << std::endl;
 
         // Draw Line
-        glVertex2f( (-1 * x_position), y_position );
-        glVertex2f(x_position, y_position);
+        glVertex2f( (-1 * x_position) + x_center, y_position +y_center );
+        glVertex2f(x_position + x_center, y_position + y_center);
 //        std::cout << "X: "<< x_position << ", Y: " << y_position << std::endl;
     }
 
@@ -116,7 +98,7 @@ void createCircle(int x_center, int y_center, int radius) {
         color = (angle - 90) / 180;
         glColor3f( color, color, color);
 
-        std::cout << "Color is: " << color << std::endl;
+//        std::cout << "Color is: " << color << std::endl;
 
         /* start of line at x,y points based on angle */
         x_line_start = radius * cos(angle) + x_center;
@@ -140,13 +122,13 @@ void createCircle(int x_center, int y_center, int radius) {
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(0.0, 0.0, 0.0);
-//    createCircle(400, 300, RADIUS);
-//    createCircle(300, 200, RADIUS);
-//    createCircle(400, 300, RADIUS);
-//    createCircle(600, 500, RADIUS);
-//    createOval();
 
-    drawCircle();
+    drawCircle(100, 90, true);
+    drawCircle(20, 50, false);
+    drawCircle(-100, 70, true);
+    drawCircle(-50, -70, false);
+    drawCircle(-150, -100, true);
+    drawCircle(70, -50, false);
 
     glFlush();
 }
