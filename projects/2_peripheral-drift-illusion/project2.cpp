@@ -8,12 +8,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <iostream>
-#include <math.h>
 
 #ifdef __WIN32
-#include <windows.h>  // For MS Windows
+#include <windows.h>
 #endif
 
 #ifdef __APPLE__
@@ -21,47 +19,66 @@
 #include <OpenGL/glu.h>
 #include <GLUT/glut.h>
 #else
-#include <gl/gl.h>
-#include <gl/glu.h>
-#include <gl/glut.h>
+#include <glut.h>
 #endif
 
 #define WIDTH  1000
 #define HEIGHT 600
 
-GLfloat shield[4][3] = {{ 5,  0, 0},
-                        { 8, 20, 0},
-                        {-8, 20, 0},
-                        {-5,  0, 0}};
+GLfloat blue[4][3] =   {{ 6,  0, 0},
+                        { 6, 25, 0},
+                        {-6, 25, 0},
+                        {-6,  0, 0}};
+
+GLfloat black[4][3] =  {{10, -5, 0},
+                        {10, 30, 0},
+                        { 0, 30, 0},
+                        { 0, -5, 0}};
+
+GLfloat white[4][3] =  {{-10, -5, 0},
+                        {-10, 30, 0},
+                        { 0,  30, 0},
+                        { 0,  -5, 0}};
 
 GLfloat colors[3][3] = {{ 0, 0, 0},
                         { 1, 1, 1},
                         { 0, 0, 1},};
 
-void draw_shield(void) {
+void draw_blue(void) {
     glBegin(GL_POLYGON);
-    for(int i = 0; i < 5; i++) glVertex3fv(shield[i] + HEIGHT/2);
+    for(int i = 0; i < 4; i++) glVertex3fv(blue[i]);
     glEnd();
 }
 
-void draw_rect(void) {
-    for(int rot = 0; rot < 360; rot += 30) {
+void draw_bw(int color, int control) {
+    glBegin(GL_POLYGON);
+    if((color + control)%2 == 0) {
+        for(int i = 0; i < 4; i++) glVertex3fv(black[i]);
+    }
+    else {
+        for(int i = 0; i < 4; i++) glVertex3fv(white[i]);
+    }
+    glEnd();
+}
+
+void draw_rect(int color, int control) {
+    for(int rot = 0; rot < 360; rot += 45) {
         glPushMatrix ();
         glRotated (rot, 0, 0, 1);
-        glTranslated (10, 50, 0);
-        draw_shield();
+        glTranslated (0, 50, 0);
+        if (color == 2) draw_blue();
+        else draw_bw(color, control);
         glPopMatrix();
     }
 }
 
-void draw_ring(int width_div, int height_div) {
+void draw_ring(int control) {
     for (int i = 0; i < 3; i++) {
         glColor3fv(colors[i]);
         glPushMatrix();
-        glTranslated( i, i, -i*5);
-        //glTranslated( (i-3)*50 , (i-3)*50, -i*5 );
-        glScaled(i+1, i+1, i+1);
-        draw_rect();
+        glTranslated( i, i, -i);
+        glScaled(1, 1, 1);
+        draw_rect(i, control);
         glPopMatrix();
     }
 }
@@ -70,12 +87,14 @@ void draw_ring(int width_div, int height_div) {
 
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    for(int x_position = 2; x_position <= 4; x_position += 2){
-        for(int y_position = 2; y_position <= 4; y_position += 2){
-            draw_ring(x_position, y_position);
-        }
+    glTranslated(-375, 150, 0);
+    for(int i = 0; i < 4; i++) {
+        draw_ring(i%2);
+        glTranslated(0, -300, 0);
+        draw_ring((i+1)%2);    // (i+1)%2
+        glTranslated(250, 300, 0);
     }
+
     glFlush();
 }
 
