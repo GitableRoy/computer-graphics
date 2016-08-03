@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <math.h>
+#include <valarray>
 
 #ifdef __WIN32
 #include <windows.h>  // For MS Windows
@@ -62,6 +63,48 @@ antialiasing=false;
 Polygon polly;
 Polygon anna;
 
+bool inside(int* vertex, Polygon shape) {
+    float angle[100]{}, a, b, c, angleSum = 0;
+
+    std::cout << "Vertex("<< vertex[0] << "," << vertex[1] << ")"<< std::endl;
+    for (int i = 0; i < shape.numberOfVertices - 1; i++){
+        std::cout << "Shape("<< shape.vert[i][0] << "," << shape.vert[i][1] << ")"<< std::endl;
+    }
+
+     for (int i = 0; i < shape.numberOfVertices - 1; i++){
+
+         // calculate length of triangle's sides
+         a = sqrtf((pow((shape.vert[i][0] - vertex[0]), 2)
+                     + pow((shape.vert[i][1] - vertex[1]), 2)));
+         std::cout << "Distance of A: "<< a <<std::endl;
+
+
+         b = sqrtf((pow((shape.vert[i+1][0] - vertex[0]), 2)
+                  +   pow((shape.vert[i+1][1] - vertex[1]), 2)));
+         std::cout << "Distance of B: "<< b <<std::endl;
+
+
+         c = sqrtf((pow((shape.vert[i][0] - shape.vert[i+1][0]), 2)
+                     + pow((shape.vert[i][1] - shape.vert[i+1][1]), 2)));
+         std::cout << "Distance of C: "<< c <<std::endl;
+
+
+         angle[i] = acos((a*a + b*b - c*c)
+                        /(2 * a * b));
+         std::cout << "Angle of V: " << angle[i] << std::endl;
+     }
+
+    std::valarray<float> angles (angle, shape.numberOfVertices);
+//    std::cout << angles.sum() << std::endl;
+
+    for (int i = 0; i < 100; i++) angleSum+=angle[i];
+
+    std::cout << "Sum of Angles: " <<angleSum << std::endl;
+
+
+    return true;
+}
+
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -71,20 +114,19 @@ void display(void) {
         glEnd();
     }
     glBegin(polly.type);
+        glColor3fv(colors[0]);
         for (int i = 0; i < polly.numberOfVertices; i++) glVertex2iv(polly.vert[i]);
     glEnd();
 
-    if (anna.numberOfVertices!=1) {
-        glBegin(GL_POINTS);
-        glVertex2iv(anna.vert[0]);
-        glColor3fv(colors[1]);
-        glEnd();
-
-    }
     glBegin(anna.type);
-    for (int i = 0; i < anna.numberOfVertices; i++) glVertex2iv(anna.vert[i]);
-    glEnd();
+        glColor3fv(colors[1]);
+    for (int i = 0; i < anna.numberOfVertices; i++){
+        if(inside(anna.vert[i], polly)) glColor3fv(colors[2]);
+        else glColor3fv(colors[1]);
 
+        glVertex2iv(anna.vert[i]);
+    }
+    glEnd();
 
     glutSwapBuffers();
 }
@@ -123,10 +165,10 @@ void keyboard(unsigned char key, int x, int y) {
                 polly.complete = false;
                 break;
             case 'c': polly.type = GL_LINE_LOOP;
-                if (polly.vertexIndex < 5) std::cout<< "4 vertices button working" << std::endl;
                 polly.complete = true;
 //                glEnd();
 //                glBegin(anna.type);
+                glColor3fv(colors[1]);
                 anna.type = GL_POINTS;
 
                 break;
