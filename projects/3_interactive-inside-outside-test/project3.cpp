@@ -1,6 +1,5 @@
-nclude <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <iostream>
 #include <math.h>
 
@@ -16,10 +15,15 @@ nclude <stdio.h>
 #include <glut.h>
 #endif
 
-int width = 400, height = 600, vert[100][2], n = 0,
-type = GL_LINE_STRIP, v;
+int width = 400,
+height = 600,
+vert[100][2],
+n = 0,
+type = GL_LINE_STRIP,
+v;
 
-bool rubberbanding=false, antialiasing =false;
+bool rubberbanding=false,
+antialiasing=false;
 
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -45,10 +49,11 @@ void keyboard(unsigned char key, int x, int y) {
                 glDisable(GL_LINE_SMOOTH);
             }
             break;
-        case 'c':    n = 0; break;
-        case 'l': type = GL_LINE_STRIP; break;
-        case 'p': type = GL_LINE_LOOP; break;
+        case 'r': n = 0; break;
+//        case 'l': type = GL_LINE_STRIP; break;
+        case 'c': type = GL_LINE_LOOP; break;
         case 'v': type = GL_POINTS; break;
+//        case 'e': std::cout<< "Enter button working" << std::endl;
     }
     glutPostRedisplay();
 }
@@ -58,7 +63,7 @@ int findVertex(int x, int y) {
     for(int i = 0; i < n; i++) {
         dx = vert[i][0] - x;
         dy = vert[i][1] - y;
-        if(dx * dx +dy * dy < 16) return i;
+        if(dx*dx + dy*dy < 16) return i;
     }
     return -1;
 }
@@ -67,15 +72,25 @@ void mouse (int button, int state, int x, int y) {
     switch(button) {
         case GLUT_LEFT_BUTTON:
             if(state == GLUT_DOWN) {
-                if(glutGetModifiers() == GLUT_ACTIVE_CTRL) {
-                    for(int i=v; i<n-1; i++) {
-                        vert[i][0] = vert[i+1][0];
-                        vert[i][1] = vert[i+1][1];
+                v = n++;
+                vert[v][0] = x;
+                vert[v][1] = height - 1 - y;
+                rubberbanding = true;
+                glutPostRedisplay();
+            }
+            else rubberbanding = false;
+            break;
+        case GLUT_RIGHT_BUTTON:
+            if((state==GLUT_DOWN) && (v = findVertex(x, height-1-y)) != -1){
+                if(glutGetModifiers () == GLUT_ACTIVE_CTRL) {
+                    for (int i=v; i<n-1; i++) {
+                        vert[i][0]= vert[i+1][0];
+                        vert[i][1]= vert[i+1][1];
                     }
                     n--;
-                }else {
-                    vert[v][0] = x;
-                    vert[v][1] = height - 1 - y;
+                } else {
+                    vert[v][0]=x;
+                    vert[v][1]=height-1-y;
                     rubberbanding = true;
                 }
                 glutPostRedisplay();
@@ -102,8 +117,8 @@ int main(int argc, char** argv) {
     glutCreateWindow("Project 3");
     
     
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glColor3f(1,1,0);
+    glClearColor(1.0, 1.0, 1.0, 0.0);
+    glColor3f(0,0,0);
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
