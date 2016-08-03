@@ -18,12 +18,17 @@
 int width = 400,
 height = 600;
 
+GLfloat colors[3][3] = {{ 0, 0, 0},
+                        { 1, 0, 0},
+                        { 0, 1, 0},};
+
 class Polygon {
 public:
     int vert[100][2],
     numberOfVertices = 0,
     type = GL_LINE_STRIP,
     vertexIndex;
+    bool complete = false;
 
     // public:
     bool intersect(void) {
@@ -33,11 +38,11 @@ public:
 };
 
 class Vertex {
-private:
-    int color[1][3],
-    xyLocation[1][2];
-
 public:
+    int color[1][3],
+    xyLocation[1][2],
+    type = GL_LINE_STRIP;
+
     Vertex(int x, int y){
         xyLocation[0][0] = x;
         xyLocation[0][1] = y;
@@ -55,6 +60,7 @@ bool rubberbanding=false,
 antialiasing=false;
 
 Polygon polly;
+Polygon anna;
 
 void display(void) {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -65,29 +71,68 @@ void display(void) {
         glEnd();
     }
     glBegin(polly.type);
-    for (int i = 0; i < polly.numberOfVertices; i++) glVertex2iv(polly.vert[i]);
+        for (int i = 0; i < polly.numberOfVertices; i++) glVertex2iv(polly.vert[i]);
     glEnd();
+
+    if (anna.numberOfVertices!=1) {
+        glBegin(GL_POINTS);
+        glVertex2iv(anna.vert[0]);
+        glColor3fv(colors[1]);
+        glEnd();
+
+    }
+    glBegin(anna.type);
+    for (int i = 0; i < anna.numberOfVertices; i++) glVertex2iv(anna.vert[i]);
+    glEnd();
+
+
     glutSwapBuffers();
 }
 
 void keyboard(unsigned char key, int x, int y) {
-    switch(key){
-        case 'a':antialiasing =! antialiasing;
-            if(antialiasing) {
-                glEnable(GL_BLEND);
-                glEnable(GL_LINE_SMOOTH);
-            }else{
-                glDisable(GL_BLEND);
-                glDisable(GL_LINE_SMOOTH);
-            }
-            break;
-        case 'r': polly.numberOfVertices = 0; break;
-            //        case 'l': polly.type = GL_LINE_STRIP; break;
-        case 'c': polly.type = GL_LINE_LOOP;
-            if (polly.vertexIndex < 5) std::cout<< "4 vetices button working" << std::endl;
-            break;
-        case 'v': polly.type = GL_POINTS; break;
-            //        case 'e': std::cout<< "Enter button working" << std::endl;
+    if (polly.complete) {
+        switch(key) {
+            case 'a':antialiasing =! antialiasing;
+                if(antialiasing) {
+                    glEnable(GL_BLEND);
+                    glEnable(GL_LINE_SMOOTH);
+                }else{
+                    glDisable(GL_BLEND);
+                    glDisable(GL_LINE_SMOOTH);
+                }
+                break;
+            case 'r': polly.numberOfVertices = 0;
+                polly.type = GL_LINE_STRIP;
+                polly.complete = false;
+                break;
+        }
+    }
+    else {
+        switch(key){
+            case 'a':antialiasing =! antialiasing;
+                if(antialiasing) {
+                    glEnable(GL_BLEND);
+                    glEnable(GL_LINE_SMOOTH);
+                }else{
+                    glDisable(GL_BLEND);
+                    glDisable(GL_LINE_SMOOTH);
+                }
+                break;
+            case 'r': polly.numberOfVertices = 0;
+                polly.type = GL_LINE_STRIP;
+                polly.complete = false;
+                break;
+            case 'c': polly.type = GL_LINE_LOOP;
+                if (polly.vertexIndex < 5) std::cout<< "4 vertices button working" << std::endl;
+                polly.complete = true;
+//                glEnd();
+//                glBegin(anna.type);
+                anna.type = GL_POINTS;
+
+                break;
+//            case 'v': polly.type = GL_POINTS; break;
+                //        case 'e': std::cout<< "Enter button working" << std::endl;
+        }
     }
     glutPostRedisplay();
 }
@@ -103,34 +148,67 @@ int findVertex(int x, int y) {
 }
 
 void mouse (int button, int state, int x, int y) {
-    switch(button) {
-        case GLUT_LEFT_BUTTON:
-            if(state == GLUT_DOWN) {
-                polly.vertexIndex = polly.numberOfVertices++;
-                polly.vert[polly.vertexIndex][0] = x;
-                polly.vert[polly.vertexIndex][1] = height - 1 - y;
-                rubberbanding = true;
-                glutPostRedisplay();
-            }
-            else rubberbanding = false;
-            break;
-        case GLUT_RIGHT_BUTTON:
-            if((state==GLUT_DOWN) && (polly.vertexIndex = findVertex(x, height-1-y)) != -1){
-                if(glutGetModifiers () == GLUT_ACTIVE_CTRL) {
-                    for (int i=polly.vertexIndex; i<polly.numberOfVertices-1; i++) {
-                        polly.vert[i][0]= polly.vert[i+1][0];
-                        polly.vert[i][1]= polly.vert[i+1][1];
-                    }
-                    polly.numberOfVertices--;
-                } else {
-                    polly.vert[polly.vertexIndex][0]=x;
-                    polly.vert[polly.vertexIndex][1]=height-1-y;
-                    rubberbanding = true;
+    if (polly.complete){
+        switch(button) {
+            case GLUT_LEFT_BUTTON:
+                if(state == GLUT_DOWN) {
+                    anna.vertexIndex = anna.numberOfVertices++;
+                    anna.vert[anna.vertexIndex][0] = x;
+                    anna.vert[anna.vertexIndex][1] = height - 1 - y;
+//                    rubberbanding = true;
+                    glutPostRedisplay();
                 }
-                glutPostRedisplay();
-            }
-            else rubberbanding = false;
-            break;
+                else rubberbanding = false;
+                break;
+            case GLUT_RIGHT_BUTTON:
+                if((state==GLUT_DOWN) && (anna.vertexIndex = findVertex(x, height-1-y)) != -1){
+                    if(glutGetModifiers () == GLUT_ACTIVE_CTRL) {
+                        for (int i=anna.vertexIndex; i<anna.numberOfVertices-1; i++) {
+                            anna.vert[i][0]= anna.vert[i+1][0];
+                            anna.vert[i][1]= anna.vert[i+1][1];
+                        }
+                        anna.numberOfVertices--;
+                    } else {
+                        anna.vert[anna.vertexIndex][0]=x;
+                        anna.vert[anna.vertexIndex][1]=height-1-y;
+                        rubberbanding = true;
+                    }
+                    glutPostRedisplay();
+                }
+                else rubberbanding = false;
+                break;
+        }
+    }
+    else {
+        switch(button) {
+            case GLUT_LEFT_BUTTON:
+                if(state == GLUT_DOWN) {
+                    polly.vertexIndex = polly.numberOfVertices++;
+                    polly.vert[polly.vertexIndex][0] = x;
+                    polly.vert[polly.vertexIndex][1] = height - 1 - y;
+                    rubberbanding = true;
+                    glutPostRedisplay();
+                }
+                else rubberbanding = false;
+                break;
+//            case GLUT_RIGHT_BUTTON:
+//                if((state==GLUT_DOWN) && (polly.vertexIndex = findVertex(x, height-1-y)) != -1){
+//                    if(glutGetModifiers () == GLUT_ACTIVE_CTRL) {
+//                        for (int i=polly.vertexIndex; i<polly.numberOfVertices-1; i++) {
+//                            polly.vert[i][0]= polly.vert[i+1][0];
+//                            polly.vert[i][1]= polly.vert[i+1][1];
+//                        }
+//                        polly.numberOfVertices--;
+//                    } else {
+//                        polly.vert[polly.vertexIndex][0]=x;
+//                        polly.vert[polly.vertexIndex][1]=height-1-y;
+//                        rubberbanding = true;
+//                    }
+//                    glutPostRedisplay();
+//                }
+//                else rubberbanding = false;
+//                break;
+        }
     }
 }
 
