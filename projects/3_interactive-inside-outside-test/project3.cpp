@@ -19,6 +19,8 @@
 int width = 400,
 height = 600;
 
+float pi = 3.141592;
+
 GLfloat colors[3][3] = {{ 0, 0, 0},
                         { 1, 0, 0},
                         { 0, 1, 0},};
@@ -89,8 +91,8 @@ bool inside(int* vertex, Polygon shape) {
          std::cout << "Distance of C: "<< c <<std::endl;
 
 
-         angle[i] = acos((a*a + b*b - c*c)
-                        /(2 * a * b));
+         angle[i] = (acos((a*a + b*b - c*c)
+                        /(2 * a * b))) * 180/pi;
          std::cout << "Angle of V: " << angle[i] << std::endl;
      }
 
