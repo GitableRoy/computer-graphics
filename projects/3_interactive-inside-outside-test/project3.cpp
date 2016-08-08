@@ -1,3 +1,10 @@
+/**
+*
+* Leroy Leslie
+*
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -28,10 +35,16 @@ GLfloat colors[3][3] = {{ 0, 0, 0},
 class Polygon {
 public:
     int vert[100][2],
-    numberOfVertices = 0,
-    type = GL_LINE_STRIP,
+    numberOfVertices,
+    type,
     vertexIndex;
-    bool complete = false;
+    bool complete;
+
+	Polygon(){
+		numberOfVertices = 0;
+		type = GL_LINE_STRIP;
+		complete = false;
+	}
 
     // public:
     bool intersect(void) {
@@ -40,25 +53,6 @@ public:
 
 };
 
-class Vertex {
-public:
-    int color[1][3],
-    xyLocation[1][2],
-    type = GL_LINE_STRIP;
-
-    Vertex(int x, int y){
-        xyLocation[0][0] = x;
-        xyLocation[0][1] = y;
-    }
-
-    int getXYLocation() {
-        return 0;
-    }
-
-    void setColor() {}
-};
-
-
 bool rubberbanding=false,
 antialiasing=false;
 
@@ -66,34 +60,53 @@ Polygon polly;
 Polygon anna;
 
 bool inside(int* vertex, Polygon shape) {
-    float angle[100]{}, a, b, c, angleSum = 0;
+    float angle[100], a, b, c, adj_i, hyp_i, adj_j, hyp_j, rot, angleSum = 0;
 
+	/*
     std::cout << "Vertex("<< vertex[0] << "," << vertex[1] << ")"<< std::endl;
     for (int i = 0; i < shape.numberOfVertices - 1; i++){
         std::cout << "Shape("<< shape.vert[i][0] << "," << shape.vert[i][1] << ")"<< std::endl;
     }
+	*/
 
      for (int i = 0; i < shape.numberOfVertices - 1; i++){
 
          // calculate length of triangle's sides
          a = sqrtf((pow((shape.vert[i][0] - vertex[0]), 2)
                      + pow((shape.vert[i][1] - vertex[1]), 2)));
-         std::cout << "Distance of A: "<< a <<std::endl;
+         // std::cout << "Distance of A: "<< a <<std::endl;
 
 
          b = sqrtf((pow((shape.vert[i+1][0] - vertex[0]), 2)
                   +   pow((shape.vert[i+1][1] - vertex[1]), 2)));
-         std::cout << "Distance of B: "<< b <<std::endl;
+         // std::cout << "Distance of B: "<< b <<std::endl;
 
 
          c = sqrtf((pow((shape.vert[i][0] - shape.vert[i+1][0]), 2)
                      + pow((shape.vert[i][1] - shape.vert[i+1][1]), 2)));
-         std::cout << "Distance of C: "<< c <<std::endl;
+         // std::cout << "Distance of C: "<< c <<std::endl;
 
 
+		 // use reference angles to find out whether rotating clockwise or counter
+		 adj_i = sqrt(pow(vertex[0], 2) + pow((shape.vert[i][1] - vertex[1]), 2));
+		 hyp_i = sqrt(pow(vertex[0], 2) + pow((shape.vert[i][1] - vertex[1]), 2));
+
+		 adj_i = sqrt(pow(vertex[0], 2) + pow((shape.vert[i+1][1] - vertex[1]), 2));
+		 hyp_i = sqrt(pow(vertex[0], 2) + pow((shape.vert[i+1][1] - vertex[1]), 2));
+
+		 rot = acos(adj_i/hyp_i) - acos(adj_j/hyp_j);
+		 std::cout << ": "<< adj_i<<", "<< hyp_i<<", " <<adj_j<< ", " << hyp_j << "r: " << rot <<std::endl;
+
+
+		 // use law of cosine to calculate angle
+		 if(rot<0)
+			angle[i] = -1*(acos((a*a + b*b - c*c)
+                        /(2 * a * b))) * 180/pi;
+
+		 else
          angle[i] = (acos((a*a + b*b - c*c)
                         /(2 * a * b))) * 180/pi;
-         std::cout << "Angle of V: " << angle[i] << std::endl;
+         // std::cout << "Angle of V: " << angle[i] << std::endl;
      }
 
     std::valarray<float> angles (angle, shape.numberOfVertices);
@@ -123,6 +136,7 @@ void display(void) {
     glBegin(anna.type);
         glColor3fv(colors[1]);
     for (int i = 0; i < anna.numberOfVertices; i++){
+
         if(inside(anna.vert[i], polly)) glColor3fv(colors[2]);
         else glColor3fv(colors[1]);
 
@@ -168,14 +182,9 @@ void keyboard(unsigned char key, int x, int y) {
                 break;
             case 'c': polly.type = GL_LINE_LOOP;
                 polly.complete = true;
-//                glEnd();
-//                glBegin(anna.type);
                 glColor3fv(colors[1]);
                 anna.type = GL_POINTS;
-
                 break;
-//            case 'v': polly.type = GL_POINTS; break;
-                //        case 'e': std::cout<< "Enter button working" << std::endl;
         }
     }
     glutPostRedisplay();
