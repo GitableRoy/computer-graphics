@@ -40,12 +40,14 @@ diag[3][3] = {{1, 0, 0},
 
 int axis = 4;                                           // 0:x, 1:y, 2:z: light around z
 bool idleOn = true;
+double t, p = 3.141593 / 180;
 
-GLfloat xTranslate, yTranslate, slope;
+
+GLfloat run, rise, slope, angle;
 
 
 GLfloat ring(double angle) {
-    return cos(angle);
+    return cos(angle*p);
 }
 
 
@@ -53,6 +55,7 @@ void createWatchFace() {
     glPushMatrix();
         GLUquadricObj* quadObj = gluNewQuadric();
         gluQuadricDrawStyle(quadObj, GLU_OUTLINE_POLYGON);
+        glTranslatef(0, 0, 1);
         gluCylinder(quadObj, 1.5, 1.5, 0.5, 50, 4);
         glRotated(180,0,0,0);
         gluDisk(quadObj, 0, 1.5, 50, 1);
@@ -64,20 +67,20 @@ void createWatchFace() {
 
 void createWristband() {
     glPushMatrix();
-        glScalef(10, 4, 1);
+        glScalef(10, 2, 1);
         glRotatef(90, 0, 1, 0);
 
-        double t, p = 3.141593 / 180;
-        for(int i = 0; i < 360; i = i + 20) {
+        for(int i = 0; i < 360; i = i + 15) {
             t = i * p;
-            xTranslate = ring(t) * cos(t);
-            yTranslate = ring(t) * sin(t);
-            slope = xTranslate/yTranslate;
-//            std::cout << slope << std::endl;
+            run = ring(t) * cos(t);
+            rise = ring(t) * sin(t);
+            slope = rise/run;
+            angle = atanf(-1/slope) * 180 / 3.141593;
+            std::cout << angle << std::endl;
 
             glPushMatrix();
-                glTranslatef(xTranslate, yTranslate, 0);
-//                glRotatef(-1/slope, 1, 0, 0);
+                glTranslatef(run, rise, 0);
+                glRotatef(angle, 0, 0, 1);
                 glutSolidCube(0.2);
             glPopMatrix();
         }
@@ -102,12 +105,9 @@ void display(void) {
             glLightfv(GL_LIGHT0, GL_POSITION, pos);
             glPopMatrix();                                      // Restore CTM for object
         }
-        // glutSolidTorus(0.4, 1.0, 48, 96);                     // Draw object
-        //glutSolidOctahedron();
 
     createWatchFace();
     createWristband();
-
 
     glPopMatrix();
     glutSwapBuffers();
