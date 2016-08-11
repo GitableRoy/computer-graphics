@@ -23,9 +23,9 @@
 #endif
 
 GLfloat pos[] = {-2, 4, 5, 1},                          // Light position
-amb[] = {0.3, 0.3, 0.3, 1.0};                   // Ambient intensity
+amb[] = {0.3, 0.3, 0.3, 1.0};                           // Ambient intensity
 
-GLfloat front_amb_diff[] = {0.7, 0.5, 0.1, 1.0};        // Front side property
+GLfloat front_amb_diff[] = {0.7, 0.7, 0.7, 1.0};        // Front side property
 GLfloat back_amb_diff[] = {0.4, 0.7, 0.1, 1.0};         // Back side property
 
 GLfloat spe[] = {0.25, 0.25, 0.25, 1.0};                // Property for front & back_amb_diff
@@ -34,9 +34,9 @@ dt = 0.5,
 axes[3][3] = {{1, 0, 0},
               {0, 1, 0},
               {0, 0, 1}},
-diag[3][3] = {{1, 0, 0},
+diag[3][3] = {{1, 1, 0},
               {0, 1, 1},
-              {0, 0, 1}};
+              {0, 1, 1}};
 
 int axis = 4;                                           // 0:x, 1:y, 2:z: light around z
 bool idleOn = true;
@@ -101,7 +101,7 @@ void display(void) {
         }
         else{
             glPushMatrix();                                     // Preserve CTM for object
-            glRotated(theta, 0, 0, 1);                        // Rotate light around z
+            glRotated(theta, 0, 0, 1);                          // Rotate light around z
             glLightfv(GL_LIGHT0, GL_POSITION, pos);
             glPopMatrix();                                      // Restore CTM for object
         }
@@ -114,8 +114,7 @@ void display(void) {
 };
 
 void idle(void) {
-//    if(theta >= 360) axis = (axis + 1)%4;                // Cycle through the 4 stages
-    if(idleOn) theta = (theta < 360)? theta + dt:dt;                // Increment rotation angle
+    if(idleOn) theta = (theta < 360)? theta + dt:dt;            // Increment rotation angle
     glutPostRedisplay();
 };
 
